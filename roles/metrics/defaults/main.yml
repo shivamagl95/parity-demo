@@ -1,0 +1,4 @@
+metricbeat_version: 7.4.0
+heartbeat_version: 7.4.0
+kibana_url: "54.84.164.236"
+elasticsearch_url: "54.84.164.236:9200"

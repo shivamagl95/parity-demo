@@ -2,4 +2,4 @@
 - hosts: monitoring
   roles:
     - monitoring
-  #  - nginx
+    - metrics

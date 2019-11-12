@@ -1,0 +1,11 @@
+- name: restart metricbeat
+  service:
+    name: metricbeat
+    state: restarted
+  become: yes
+
+- name: restart heartbeat
+  service:
+    name: heartbeat-elastic
+    state: restarted
+  become: yes

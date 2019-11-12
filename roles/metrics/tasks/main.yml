@@ -1,0 +1,105 @@
+---
+- name: Download MetricBeat
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{{ metricbeat_version }}-amd64.deb"
+    dest: "/home/ubuntu/metricbeat-{{ metricbeat_version }}-amd64.deb"
+    mode: '0664'
+  become: yes
+
+- name: Download HeartBeat
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{{ heartbeat_version }}-amd64.deb"
+    dest: "/home/ubuntu/heartbeat-{{ heartbeat_version }}-amd64.deb"
+    mode: '0664'
+  become: yes
+
+- name: Install MetricBeat
+  shell: "dpkg -i metricbeat-{{ metricbeat_version }}-amd64.deb"
+  args:
+    chdir: /home/ubuntu/
+  become: yes
+
+- name: Install HeartBeat
+  shell: "dpkg -i heartbeat-{{ heartbeat_version }}-amd64.deb"
+  args:
+    chdir: /home/ubuntu/
+  become: yes
+
+- name: create a custom metricbeat file
+  template:
+    src: metricbeat.yml.j2
+    dest: /etc/metricbeat/metricbeat.yml
+    owner: root
+    group: root
+    mode: '0600'
+  notify: restart metricbeat
+  become: yes
+
+- name: create a custom heartbeat file
+  template:
+    src: heartbeat.yml.j2
+    dest: /etc/heartbeat/heartbeat.yml
+    owner: root
+    group: root
+    mode: '0600'
+  notify: restart heartbeat
+  become: yes
+
+- name: Enable various Modules
+  shell: "metricbeat modules enable {{ item }}"
+  with_items:
+    - nginx
+    - system
+  become: yes
+
+- name: create a custom metricbeat file for nginx
+  template:
+    src: nginx.yml.j2
+    dest: /etc/metricbeat/modules.d/nginx.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart metricbeat
+  become: yes
+
+- name: create a custom metricbeat file for system
+  template:
+    src: system.yml.j2
+    dest: /etc/metricbeat/modules.d/system.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart metricbeat
+  become: yes
+
+- name: Run setup for Metricbeat
+  shell: metricbeat setup
+  become: yes
+
+- name: Run setup for Heartbeat
+  shell: heartbeat setup
+  become: yes
+
+- name: Make sure Metricbeat service is running
+  systemd:
+    state: started
+    name: metricbeat
+  become: yes
+
+- name: enable service metricbeat
+  systemd:
+    name: metricbeat
+    enabled: yes
+  become: yes
+
+- name: Make sure Heartbeat service is running
+  systemd:
+    state: started
+    name: heartbeat-elastic
+  become: yes
+
+- name: enable service heartbeat
+  systemd:
+    name: heartbeat-elastic
+    enabled: yes
+  become: yes
