@@ -1,0 +1,9 @@
+---
+- hosts: substrate-node
+  vars:
+    consensus_authorities: []
+    validator_node_id: ""
+    validator_node: 54.161.76.210
+    additional_node: 3.81.160.67
+  roles:
+    - substrate-node

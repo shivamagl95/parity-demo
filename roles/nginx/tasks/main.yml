@@ -1,0 +1,45 @@
+---
+- name: Run "apt-get update"
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Basic Packages
+  apt:
+    pkg:
+    - language-pack-en
+    - telnet
+    - gcc 
+    - g++ 
+    - make
+  become: yes
+
+- name: Install nginx package
+  apt:
+    name: nginx
+    state: present
+  become: yes
+
+- name: create a nginx config file
+  template:
+    src: default.j2
+    dest: /etc/nginx/sites-enabled/default
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart nginx
+  become: yes
+
+- name: Make sure nginx service is running
+  systemd:
+    state: started
+    name: nginx
+  become: yes
+
+- name: enable service nginx
+  systemd:
+    name: nginx
+    enabled: yes
+  become: yes
+
+

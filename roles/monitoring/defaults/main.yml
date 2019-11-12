@@ -1,0 +1,10 @@
+elasticsearch_version: 7.4.0
+elasticsearch_data_path: /var/lib/elasticsearch
+elasticsearch_logs_path: /var/log/elasticsearch
+elasticsearch_network_host: 0.0.0.0
+elasticsearch_http_port: 9200
+elasticsearch_discovery_type: single-node
+kibana_version: 7.4.0
+kibana_server_port: 5601
+kibana_server_host: 0.0.0.0
+logtrail_version: 7.4.0

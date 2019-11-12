@@ -1,0 +1,181 @@
+---
+- name: Install Basic Packages
+  apt:
+    pkg:
+    - language-pack-en
+    - telnet
+    - jq
+    - moreutils
+  become: yes
+ 
+#- name: Install the substrate and related packages ( It will take around 1 hour to complete.)
+#  shell: curl https://getsubstrate.io -sSf | bash
+#  args:
+#    chdir: /home/ubuntu
+
+- name: clone the substrate from github 
+  shell: git clone -b v1.0 https://github.com/paritytech/substrate
+  args:
+    chdir: /home/ubuntu/
+
+- name: create a service shell script
+  template:
+    src: install_dependencies.sh.j2
+    dest: /home/ubuntu/install_dependencies.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: '0777'
+
+- name: execute the shell script to install the dependencies
+  shell: /bin/bash /home/ubuntu/install_dependencies.sh
+#
+#- name: source the cargo env
+#  shell: export PATH="$HOME/.cargo/bin:$PATH"
+#
+#- name: Rust toolchain is up to date
+#  shell: bash scripts/init.sh
+#  args:
+#    chdir: /home/ubuntu/substrate/node-template/
+#
+#- name: Compile the Wasm version of the runtime code
+#  shell: bash scripts/build.sh
+#  args:
+#    chdir: /home/ubuntu/substrate/node-template/
+#
+#- name: Compile the native version of the node
+#  shell: cargo build --release
+#  args: 
+#    chdir: /home/ubuntu/substrate/
+
+- name: create the user Account keys with subkeys
+  shell: /home/ubuntu/.cargo/bin/subkey -e generate >> /home/ubuntu/subkey.txt
+  args:
+    chdir: /home/ubuntu/
+
+
+- name: Find the SS58 Address for validator nodes
+  shell: cat /home/ubuntu/subkey.txt | grep "SS58 Address" | awk '{print $3}'
+  args:
+    chdir: /home/ubuntu/
+  register: address_validator
+
+- name: Find the SS58 Address for additional node
+  shell: cat /home/ubuntu/subkey.txt | grep "SS58 Address" | awk '{print $3}'
+  args:
+    chdir: /home/ubuntu/
+  register: address_additional
+
+- name: Create the authorities for the nodes
+  set_fact:
+    consensus_authorities: "{{ consensus_authorities }} + [ '{{ item }}' ]"
+  with_items: 
+    - "{{ address_validator.stdout }}"
+    - "{{ address_additional.stdout }}"
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: Print the consensus authorities for each node
+  debug: var=consensus_authorities
+  when: inventory_hostname == "{{ validator_node }}"
+
+- set_fact:
+    authorities: "{{ consensus_authorities }}"
+
+- name: create the custom genesis json file
+  shell: ./target/release/node-template build-spec --chain=local > customSpec.json
+  args:
+    chdir: /home/ubuntu/substrate/
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: create a consensus shell file
+  template:
+    src: consensus.sh.j2
+    dest: /tmp/consensus.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: '0777'
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: Change the consensus Authorities in the custom genesis file
+  shell: /bin/bash /tmp/consensus.sh
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: create the RAW custom genesis json file
+  shell: ./target/release/node-template build-spec --chain customSpec.json --raw > customSpecRaw.json
+  args:
+    chdir: /home/ubuntu/substrate/
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: Find the Secret for validator node
+  shell: cat /home/ubuntu/subkey.txt | grep "Secret seed" | awk '{print $3}'
+  args:
+    chdir: /home/ubuntu/
+  register: secret_seed_validator
+  when: inventory_hostname == "{{ validator_node }}"
+
+- set_fact:
+    secret_validator: "{{secret_seed_validator.stdout }}"
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: Find the Secret for additional node
+  shell: cat /home/ubuntu/subkey.txt | grep "Secret seed" | awk '{print $3}'
+  args:
+    chdir: /home/ubuntu/
+  register: secret_seed_additional
+  when: inventory_hostname == "{{ additional_node }}"
+
+- set_fact:
+    secret_additional: "{{secret_seed_additional.stdout }}"
+  when: inventory_hostname == "{{ additional_node }}"
+
+- name: Run the node for the validator 
+  shell: " nohup ./target/release/node-template --base-path /tmp/substrateChainData --key {{ secret_validator }} --chain ./customSpecRaw.json --port 30333 --ws-external --ws-port 5000 --telemetry-url ws://telemetry.polkadot.io:1024 --validator --name ShivamSubstrateNode1 & 2> /home/ubuntu/substrate/nohup.out"
+  args:
+    chdir: /home/ubuntu/substrate
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: copy the RAW custom file to ansible server from validator node
+  fetch:
+    src: /home/ubuntu/substrate/customSpecRaw.json
+    dest: /tmp/
+    flat: yes
+  when: inventory_hostname == "{{ validator_node }}"
+
+- name: copy the RAW custom file to additional server from ansible node
+  copy:
+    src: /tmp/customSpecRaw.json
+    dest: /home/ubuntu/substrate/customSpecRaw.json
+    owner: ubuntu
+    group: ubuntu
+    mode: '0664'
+  when: inventory_hostname == "{{ additional_node }}"
+
+#- name: Find the local node id for the validator node
+#  shell: cat nohup.out | grep "Local node identity" | awk '{print $NF}'
+#  args:
+#    chdir: /home/ubuntu/substrate
+#  register: local_node_id_validator
+#  when: inventory_hostname == "{{ validator_node }}"
+#
+#- set_fact:
+#    validator_node_id: "{{local_node_id_validator.stdout }}"
+#  when: inventory_hostname == "{{ validator_node }}"
+#
+#- name: Print the node id of validator
+#  debug: var=validator_node_id
+#  when: inventory_hostname == "{{ validator_node }}"
+ # ignore_errors: yes
+
+#- name: create a service shell script
+#  template:
+#    src: additional_node.sh.j2
+#    dest: /tmp/additional_node.sh
+#    owner: ubuntu
+#    group: ubuntu
+#    mode: '0777'
+#  when: inventory_hostname == "{{ additional_node }}"
+#- name: Run the node for the addtional node
+#  shell: "nohup ./target/release/node-template --base-path /tmp/substrateChainData --chain ./customSpecRaw.json --key {{ secret_additional }} --validator --port 30333 --ws-external --ws-port 5000 --telemetry-url ws://telemetry.polkadot.io:1024 --name ShivamSubstrateNode2 --bootnodes /ip4/{{ validator_node }}/tcp/30333/p2p/{{ validator_node_id }} &"
+#  args:
+#    chdir: /home/ubuntu/substrate
+#  when: inventory_hostname == "{{ additional_node }}"
+

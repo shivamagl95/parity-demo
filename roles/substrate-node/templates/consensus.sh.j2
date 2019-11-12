@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /home/ubuntu/substrate
+jq '.genesis[].consensus.authorities = {{ authorities| to_json }}' customSpec.json |sponge customSpec.json

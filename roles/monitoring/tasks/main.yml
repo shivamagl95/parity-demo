@@ -1,0 +1,148 @@
+---
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Basic Packages
+  apt:
+    pkg:
+    - language-pack-en
+    - telnet
+  become: yes
+
+- name: Install latest version of "openjdk-8-jdk"
+  apt:
+    name: openjdk-8-jdk
+    state: latest
+  become: yes
+
+- name: Download Elasticsearch 
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-amd64.deb"
+    dest: "/home/ubuntu/elasticsearch-{{ elasticsearch_version }}-amd64.deb"
+    mode: '0640'
+
+- name: Download Elasticsearch sha
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-amd64.deb.sha512"
+    dest: "/home/ubuntu/elasticsearch-{{ elasticsearch_version }}-amd64.deb.sha512"
+    mode: '0640'
+
+- name: check the SHA512
+  shell: "shasum -a 512 -c elasticsearch-{{ elasticsearch_version }}-amd64.deb.sha512"
+  args:
+    chdir: /home/ubuntu/
+
+- name: Install the Elasticsearch
+  shell: "dpkg -i elasticsearch-{{ elasticsearch_version }}-amd64.deb"
+  args:
+    chdir: /home/ubuntu/
+  become: yes
+
+- name: create a custom elasticsearch file
+  template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: root
+    group: elasticsearch
+    mode: '0660'
+  notify: restart elasticsearch
+  become: yes
+
+- name: Started the Elasticsearch Service
+  systemd:
+    state: started
+    name: elasticsearch
+  become: yes
+
+- name: enable service elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+  become: yes
+
+- name: Download Kibana
+  get_url:
+    url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ kibana_version }}-amd64.deb"
+    dest: "/home/ubuntu/kibana-{{ kibana_version }}-amd64.deb"
+    mode: '0640'
+
+- name: check the SHA512
+  shell: "shasum -a 512 kibana-{{ kibana_version }}-amd64.deb"
+  args:
+    chdir: /home/ubuntu/
+
+- name: Install the kibana
+  shell: "dpkg -i kibana-{{ kibana_version }}-amd64.deb"
+  args:
+    chdir: /home/ubuntu/
+  become: yes
+
+- name: Started the kibana Service
+  systemd:
+    state: started
+    name: kibana
+  become: yes
+
+- name: create a custom kibana file
+  template:
+    src: kibana.yml.j2
+    dest: /etc/kibana/kibana.yml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart kibana
+  become: yes
+
+- name: enable service kibana
+  systemd:
+    name: kibana
+    enabled: yes
+  become: yes
+
+#- name: Install logtrail plugin for kibana
+#  shell: "./bin/kibana-plugin install https://github.com/sivasamyk/logtrail/releases/download/v0.1.31/logtrail-{{ logtrail_version }}-0.1.31.zip --allow-root"
+#  args:
+#    chdir: /usr/share/kibana/
+#  notify: restart kibana
+#  become: yes
+#
+#- name: copy logtrail file
+#  copy:
+#    src: /etc/ansible/roles/monitoring/files/logtrail.json
+#    dest: /usr/share/kibana/plugins/logtrail/logtrail.json
+#    owner: root
+#    group: root
+#    mode: '0644'
+#    remote_src: no
+#  notify: restart kibana
+#  become: yes
+
+- name: Install nginx package
+  apt:
+    name: nginx
+    state: present
+  become: yes
+
+- name: create a nginx config file
+  template:
+    src: default.j2
+    dest: /etc/nginx/sites-enabled/default
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart nginx
+  become: yes
+
+- name: Make sure nginx service is running
+  systemd:
+    state: started
+    name: nginx
+  become: yes
+
+- name: enable service nginx
+  systemd:
+    name: nginx
+    enabled: yes
+  become: yes 

@@ -1,0 +1,17 @@
+- name: restart elasticsearch
+  service:
+    name: elasticsearch
+    state: restarted
+  become: yes
+
+- name: restart kibana
+  service:
+    name: kibana
+    state: restarted
+  become: yes
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes

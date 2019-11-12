@@ -1,0 +1,16 @@
+[Unit]
+Description=Polkadot Explorer UI service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/ubuntu/apps
+ExecStart= /usr/bin/yarn run start
+User=ubuntu
+Restart=on-failure
+
+# Specifies which signal to use when killing a service. Defaults to SIGTERM.
+# SIGHUP gives parity time to exit cleanly before SIGKILL (default 90s)
+KillSignal=SIGHUP
+
+[Install]
+WantedBy=default.target

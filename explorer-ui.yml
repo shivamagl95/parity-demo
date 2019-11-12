@@ -1,0 +1,5 @@
+---
+- hosts: explorer-ui
+  roles:
+    - explorer-ui
+    - nginx

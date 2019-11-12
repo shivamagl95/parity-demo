@@ -1,0 +1,79 @@
+---
+- name: YARN | Add the gpg key
+  apt_key:
+    url: https://dl.yarnpkg.com/debian/pubkey.gpg
+    state: present
+  become: yes
+
+- apt_repository:
+    repo: deb https://dl.yarnpkg.com/debian/ stable main
+    state: present
+  become: yes
+
+- name: YARN | Run apt-get update
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: YARN | Install yarn
+  apt:
+    name: yarn
+    state: present
+  become: yes
+
+- name: Node |Download node source 
+  shell: curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+
+- name: Node | Install Node
+  shell: apt-get install nodejs -y
+  become: yes
+#  apt:
+#    name: nodejs
+#    state: present
+#  become: yes
+
+- name: Install Basic Packages
+  apt:
+    pkg:
+    - language-pack-en
+    - telnet
+    - gcc
+    - g++
+    - make
+  become: yes
+
+- git:
+    repo: 'https://github.com/polkadot-js/apps'
+    dest: /home/ubuntu/apps
+    clone: yes
+
+- name: Run Yarn install in the apps folder
+  shell: yarn 
+  args:
+    chdir: /home/ubuntu/apps
+
+- name: create a systemd service file for explorer ui
+  template:
+    src: explorer-ui.service.j2
+    dest: /etc/systemd/system/explorer-ui.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Run explorer UI service
+  systemd:
+    state: started
+    name: explorer-ui
+  become: yes
+
+- name: enable service explorer-ui
+  systemd:
+    name: explorer-ui
+    enabled: yes
+  become: yes
