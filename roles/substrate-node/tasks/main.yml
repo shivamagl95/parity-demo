@@ -8,10 +8,10 @@
     - moreutils
   become: yes
  
-#- name: Install the substrate and related packages ( It will take around 1 hour to complete.)
-#  shell: curl https://getsubstrate.io -sSf | bash
-#  args:
-#    chdir: /home/ubuntu
+- name: Install the substrate and related packages ( It will take around 1 hour to complete.)
+  shell: curl https://getsubstrate.io -sSf | bash
+  args:
+    chdir: /home/ubuntu
 
 - name: clone the substrate from github 
   shell: git clone -b v1.0 https://github.com/paritytech/substrate
