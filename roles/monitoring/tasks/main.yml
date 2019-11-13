@@ -101,24 +101,6 @@
     enabled: yes
   become: yes
 
-#- name: Install logtrail plugin for kibana
-#  shell: "./bin/kibana-plugin install https://github.com/sivasamyk/logtrail/releases/download/v0.1.31/logtrail-{{ logtrail_version }}-0.1.31.zip --allow-root"
-#  args:
-#    chdir: /usr/share/kibana/
-#  notify: restart kibana
-#  become: yes
-#
-#- name: copy logtrail file
-#  copy:
-#    src: /etc/ansible/roles/monitoring/files/logtrail.json
-#    dest: /usr/share/kibana/plugins/logtrail/logtrail.json
-#    owner: root
-#    group: root
-#    mode: '0644'
-#    remote_src: no
-#  notify: restart kibana
-#  become: yes
-
 - name: Install nginx package
   apt:
     name: nginx
