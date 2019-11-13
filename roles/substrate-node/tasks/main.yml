@@ -8,31 +8,31 @@
     - moreutils
   become: yes
  
-#- name: Install the substrate and related packages ( It will take around 1 hour to complete.)
-#  shell: curl https://getsubstrate.io -sSf | bash
-#  args:
-#    chdir: /home/ubuntu
-#
-#- name: clone the substrate from github 
-#  shell: git clone -b v1.0 https://github.com/paritytech/substrate
-#  args:
-#    chdir: /home/ubuntu/
-#
-#- name: create a service shell script
-#  template:
-#    src: install_dependencies.sh.j2
-#    dest: /home/ubuntu/install_dependencies.sh
-#    owner: ubuntu
-#    group: ubuntu
-#    mode: '0777'
-#
-#- name: execute the shell script to install the dependencies ( init, build, cargo release )
-#  shell: /bin/bash /home/ubuntu/install_dependencies.sh
-#
-#- name: create the user Account keys with subkeys
-#  shell: /home/ubuntu/.cargo/bin/subkey -e generate >> /home/ubuntu/subkey.txt
-#  args:
-#    chdir: /home/ubuntu/
+- name: Install the substrate and related packages ( It will take around 1 hour to complete.)
+  shell: curl https://getsubstrate.io -sSf | bash
+  args:
+    chdir: /home/ubuntu
+
+- name: clone the substrate from github 
+  shell: git clone -b v1.0 https://github.com/paritytech/substrate
+  args:
+    chdir: /home/ubuntu/
+
+- name: create a service shell script
+  template:
+    src: install_dependencies.sh.j2
+    dest: /home/ubuntu/install_dependencies.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: '0777'
+
+- name: execute the shell script to install the dependencies ( init, build, cargo release. It will take around 1 hour to complete. )
+  shell: /bin/bash /home/ubuntu/install_dependencies.sh
+
+- name: create the user Account keys with subkeys
+  shell: /home/ubuntu/.cargo/bin/subkey -e generate >> /home/ubuntu/subkey.txt
+  args:
+    chdir: /home/ubuntu/
 
 
 - name: Find the SS58 Address for validator nodes
@@ -109,8 +109,17 @@
     secret_additional: "{{secret_seed_additional.stdout }}"
   when: inventory_hostname == "{{ additional_node }}"
 
+- name: copy the service file to the validator node
+  template:
+    src: validator.sh.j2
+    dest: /home/ubuntu/substrate/validator.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: '0777'
+  when: inventory_hostname == "{{ validator_node }}"
+
 - name: Run the node for the validator 
-  shell: " nohup ./target/release/node-template --base-path /tmp/substrateChainData --key {{ secret_validator }} --chain ./customSpecRaw.json --port 30333 --ws-external --ws-port 5000 --telemetry-url ws://telemetry.polkadot.io:1024 --validator --name ShivamSubstrateNode1 & 2> /home/ubuntu/substrate/nohup.out"
+  command: ./validator.sh
   args:
     chdir: /home/ubuntu/substrate
   when: inventory_hostname == "{{ validator_node }}"
@@ -131,7 +140,6 @@
     mode: '0664'
   when: inventory_hostname == "{{ additional_node }}"
 
-################################################################
 - name: create a service shell script
   template:
     src: additional.sh.j2

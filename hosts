@@ -19,8 +19,8 @@
 ## 192.168.100.1
 ## 192.168.100.10
 [substrate-node]
-3.90.151.86
-3.80.247.63
+54.224.47.244
+3.90.115.34
 # Ex 2: A collection of hosts belonging to the 'webservers' group
 
 ## [webservers]

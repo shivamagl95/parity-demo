@@ -3,7 +3,8 @@
   vars:
     consensus_authorities: []
     validator_node_id: ""
-    validator_node: 3.80.247.63
-    additional_node: 3.90.151.86
+    validator_node: 54.224.47.244
+    additional_node: 3.90.115.34
   roles:
     - substrate-node
+    - metrics

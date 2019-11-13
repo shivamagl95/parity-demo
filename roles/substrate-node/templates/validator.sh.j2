@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /home/ubuntu/substrate
+nohup ./target/release/node-template --base-path /tmp/substrateChainData --key {{ secret_validator }} --chain ./customSpecRaw.json --port 30333 --ws-external --ws-port 5000 --telemetry-url ws://telemetry.polkadot.io:1024 --validator --name ShivamSubstrateNode1 &> output.log &

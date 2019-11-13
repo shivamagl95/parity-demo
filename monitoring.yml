@@ -2,4 +2,3 @@
 - hosts: monitoring
   roles:
     - monitoring
-    - metrics
