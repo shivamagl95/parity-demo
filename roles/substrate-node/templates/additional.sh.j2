@@ -1,0 +1,9 @@
+#!/bin/bash
+cd /home/ubuntu/substrate
+validator_node_id=`cat nohup.out | grep "Local node identity" | awk '{print $NF}'`
+echo $validator_node_id
+cat <<EOF > /home/ubuntu/node_id.txt
+#!/bin/bash
+validator_id=$validator_node_id
+cd /home/ubuntu/substrate
+EOF
