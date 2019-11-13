@@ -7,4 +7,3 @@
     additional_node: 3.90.115.34
   roles:
     - substrate-node
-    - metrics
