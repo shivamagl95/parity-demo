@@ -45,6 +45,8 @@ Setup the Substrate Nodes:
 3. Add both these also in the substrate-node.yml file to make one node as validator node ( where the custom genesis file is generated ) and other node called as additional node.
 
 Sample substrate-node.yml file:
+
+```
 ---
 - hosts: substrate-node
   vars:
@@ -54,23 +56,23 @@ Sample substrate-node.yml file:
     additional_node: 3.90.115.34
   roles:
     - substrate-node
-
-4. After this, Please run the playbook as --> ansible-playbook substrate-node.yml 
-5. This is configure both the nodes and create the network. You can check by log in to the instances.
+```
+* After this, Please run the playbook: `ansible-playbook substrate-node.yml`
+* This is configure both the nodes and create the network. You can check by log in to the instances.
 
 Setup the Explorer UI server:
-1. Launch an aws EC2 instance ( atleast t2.medium )
-2. Add the public IP of the instance in the host file.
-3. Run the ansible playbook as --> ansible-playbook explorer-ui.yml
-4. It will Setup the explorer-ui and setup nginx also. You can open on http://PUBLIC_IP_OF_INSTANCE.
+* Launch an aws EC2 instance ( atleast t2.medium )
+* Add the public IP of the instance in the host file.
+* Run the ansible playbook:`ansible-playbook explorer-ui.yml`
+* It will Setup the explorer-ui and setup nginx also. You can open on `http://PUBLIC_IP_OF_INSTANCE.`
 
 Setup the ELK server:
-1. Launch an aws EC2 instance ( atleast t2.medium )
-2. Add the public IP of the instance in the host file.
-3. Run the ansible playbook as --> ansible-playbook monitoring.yml
-4. It will Setup the elasticsearch, kibana, nginx. You can open the kibana dashboard on http://PUBLIC_IP_OF_INSTANCE.
+* Launch an aws EC2 instance ( atleast t2.medium )
+* Add the public IP of the instance in the host file.
+* Run the ansible playbook: `ansible-playbook monitoring.yml`
+* It will Setup the elasticsearch, kibana, nginx. You can open the kibana dashboard on `http://PUBLIC_IP_OF_INSTANCE.`
 
 Setup and configure the Metrics to push on ELK Server:
-1. You can use this role with any other playbooks like with explorer-ui , substrate-node etc. This role is used to setup the metricbeat and heartbeat on the required servers.
-2. You need to change the default variable values like elasticsearch and kibana URL so that beats can push the metrics on the ELK or monitoring Server.
-3. For adding defined metrics, Please change the  default files for the services
+* You can use this role with any other playbooks like with explorer-ui , substrate-node etc. This role is used to setup the metricbeat and heartbeat on the required servers.
+* You need to change the default variable values like elasticsearch and kibana URL so that beats can push the metrics on the ELK or monitoring Server.
+* For adding defined metrics, Please change the  default files for the services
