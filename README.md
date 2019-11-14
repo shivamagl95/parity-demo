@@ -1,20 +1,28 @@
+# Substrate Private Network Ansible Repo
+
 This Repo contains different ansible roles for different Purpose
 
-1. substrate-role --> This Role is used to deploy a private substrate or polkadot network of two nodes with a custom genesis file.
-2. explorer-ui --> This Role is used to deploy the polkadot Explorer UI.
-3. monitoring --> This Role is used to setup and configure the ELK System.
-4. metrics --> This role is used to configure & push the monitoring metrics such as system, nginx, etc on the ELK system.
+You can learn about substrate private network setup at https://substrate.dev/docs/en/tutorials/start-a-private-network-with-substrate
 
-Prerequitics:
-1. The Roles are tested on ubuntu 16.04
-2. Ansible version is 2.8.6
+# Ansible Roles
+
+`substrate-role`: This Role is used to deploy a private substrate or polkadot network of two nodes with a custom genesis file.
+`explorer-ui`: This Role is used to deploy the polkadot Explorer UI.
+`monitoring`:This Role is used to setup and configure the ELK System.
+`metrics`: This role is used to configure & push the monitoring metrics such as system, nginx, etc on the ELK system.
+
+# Prerequitics:
+
+* The Roles are tested on `ubuntu 16.04`
+* Ansible version is `2.8.6`
 
 Instructions to setup the whole system:
 
-Setup Ansible Server
-1. Launch an ec2 server in aws 
-2. Install Ansible
-3. Modify the hosts file and create multiple hosts as per your requirement. 
+Setup Ansible Server:
+```
+Launch an ec2 server in aws 
+Install Ansible
+Modify the hosts file and create multiple hosts as per your requirement. 
 
 Sample host file:
 [explorer-ui]
@@ -24,12 +32,13 @@ Sample host file:
 [substrate-node]
 54.224.47.244
 3.90.115.34 
-
-4. Change the ansible.cfg according to the requirement.
+```
+```
+Change the ansible.cfg according to the requirement.
    A. host_key_checking = False
    B. remote_user = ubuntu
    C. private_key_file = /home/ubuntu/demo.pem
-
+```
 Setup the Substrate Nodes:
 1. Launch 2 aws ec2 Instances ( Please use atleast t2.medium )
 2. Add the public IPs of both the instances in the host file.
