@@ -6,10 +6,10 @@ You can learn about substrate private network setup at https://substrate.dev/doc
 
 # Ansible Roles
 
-`substrate-role`: This Role is used to deploy a private substrate or polkadot network of two nodes with a custom genesis file.
-`explorer-ui`: This Role is used to deploy the polkadot Explorer UI.
-`monitoring`:This Role is used to setup and configure the ELK System.
-`metrics`: This role is used to configure & push the monitoring metrics such as system, nginx, etc on the ELK system.
+* `substrate-role`: This Role is used to deploy a private substrate or polkadot network of two nodes with a custom genesis file.
+* `explorer-ui`: This Role is used to deploy the polkadot Explorer UI.
+* `monitoring`:This Role is used to setup and configure the ELK System.
+* `metrics`: This role is used to configure & push the monitoring metrics such as system, nginx, etc on the ELK system.
 
 # Prerequitics:
 
@@ -19,12 +19,13 @@ You can learn about substrate private network setup at https://substrate.dev/doc
 Instructions to setup the whole system:
 
 Setup Ansible Server:
-```
-Launch an ec2 server in aws 
-Install Ansible
-Modify the hosts file and create multiple hosts as per your requirement. 
+
+* Launch an ec2 server in aws 
+* Install Ansible
+* Modify the hosts file and create multiple hosts as per your requirement. 
 
 Sample host file:
+```
 [explorer-ui]
 54.162.7.156
 [monitoring]
